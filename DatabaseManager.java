@@ -214,4 +214,13 @@ public class DatabaseManager{
     public int countRows(String tableName) throws SQLException{
         return Integer.parseInt(getAllFromResultSet(executeQuery("SELECT COUNT(*) FROM " + tableName)).get(0).trim());
     }
+    /**
+     * Zwraca informację czy podana tabela istnieje w bazie. 
+     * @param tableName nazwa tabeli
+     * @return true jeśli tabela istnieje w bazie, false jeśli nie istnieje 
+     * @throws SQLException 
+     */
+    public boolean exists(String tableName) throws SQLException{
+        return conn.getMetaData().getTables(null, null, tableName, null).next();
+    }
 }
