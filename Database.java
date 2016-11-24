@@ -7,7 +7,8 @@ import java.util.logging.Logger;
 
 /**
  * Klasa <code>Database</code> reprezentuje testy służące do sprawdzenia poprawności 
- * metod klasy DatabaseManager. 
+ * metod klasy DatabaseManager. Jeśli tabela istnieje, zostaje usuwana na początku i 
+ * tworzona na nowo, aby można było zobaczyć efekty zmian podczas testowania. 
  * @author AleksanderSklorz
  */
 public class Database {
@@ -18,6 +19,7 @@ public class Database {
         String dbURL = "jdbc:mysql://localhost:3306/przykladowabaza?dontTrackOpenResources=true";
         try{
             DatabaseManager manager = DatabaseManager.createDatabaseManager(jdbcDriver, dbURL, username, password);
+            if(manager.exists("Pracownik")) manager.executeUpdate("DROP TABLE Pracownik");
             manager.executeUpdate("CREATE TABLE Pracownik(id INT, imie VARCHAR(20), nazwisko VARCHAR(20), data_urodzenia DATE, zarobek DOUBLE, PRIMARY KEY(id))");
             int insertedRows = manager.executeUpdate("INSERT INTO Pracownik VALUES(1, 'Mateusz', 'Serwan', '1995-01-01', 1500.50)");
             insertedRows += manager.executeUpdate("INSERT INTO Pracownik VALUES(2, 'Janina', 'Niedziela', '1960-05-01', 2000)");
@@ -42,4 +44,3 @@ public class Database {
         }
     }
 }
-
