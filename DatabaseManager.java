@@ -10,6 +10,13 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 
+/**
+ * Klasa <code>DatabaseManager</code> reprezentuje zarządcę bazą danych. 
+ * Posiada on metody pozwalające na wykonywanie podstawowych funkcji związanych 
+ * z bazami danych, takich jak: wykonywanie zapytań, sumowanie wartości w kolumnie, 
+ * znajdowanie maksymalnej wartości w kolumnie itd. 
+ * @author AleksanderSklorz 
+ */
 public class DatabaseManager{
     private static DatabaseManager manager;
     private static Connection conn;
@@ -53,10 +60,6 @@ public class DatabaseManager{
     public int executeUpdate(String query) throws SQLException{
         Statement stat = conn.createStatement();
         return stat.executeUpdate(query);
-    }
-    public boolean execute(String query) throws SQLException{
-        Statement stat = conn.createStatement(); 
-        return stat.execute(query);
     }
     /**
      * Zwraca zbiór wszystkich wierszy tabeli. 
@@ -174,12 +177,41 @@ public class DatabaseManager{
     public boolean isNumericType(String tableName, String columnName) throws SQLException{
         int[] numericTypes = {Types.FLOAT, Types.REAL, Types.DOUBLE, Types.NUMERIC, 
             Types.DECIMAL, Types.TINYINT, Types.SMALLINT, Types.INTEGER, Types.BIGINT};
-        DatabaseMetaData metaData = conn.getMetaData();
-        ResultSet rs = metaData.getColumns(null, null, tableName, columnName);
-        rs.next(); 
-        int type = rs.getInt("DATA_TYPE");
+        int type = getColumnType(tableName, columnName);
         for(int i = 0; i < numericTypes.length; i++)
             if(type == numericTypes[i]) return true;
         return false;
+    }
+    /**
+     * Zwraca typ kolumny. 
+     * @param tableName nazwa tabeli 
+     * @param columnName kolumna, której typ sprawdzamy 
+     * @return liczbę całkowitą symbolizującą typ kolumny 
+     * @throws SQLException 
+     */
+    public int getColumnType(String tableName, String columnName) throws SQLException{
+        DatabaseMetaData metaData = conn.getMetaData(); 
+        ResultSet rs = metaData.getColumns(null, null, tableName, columnName);
+        rs.next(); 
+        return rs.getInt("DATA_TYPE");
+    }
+    /**
+     * Zwraca liczbę kolumn w tabeli. 
+     * @param tableName nazwa tabeli 
+     * @return liczba kolumn 
+     * @throws SQLException 
+     */
+    public int countColumns(String tableName) throws SQLException{
+        return Integer.parseInt(getAllFromResultSet(executeQueryInPreparedStatement(
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ?", tableName)).get(0).trim());
+    }
+    /**
+     * Zwraca liczbę wierszy w tabeli. 
+     * @param tableName nazwa tabeli. 
+     * @return liczba wierszy 
+     * @throws SQLException 
+     */
+    public int countRows(String tableName) throws SQLException{
+        return Integer.parseInt(getAllFromResultSet(executeQuery("SELECT COUNT(*) FROM " + tableName)).get(0).trim());
     }
 }
