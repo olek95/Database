@@ -2,6 +2,7 @@ package database;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,12 +14,16 @@ import java.util.logging.Logger;
  */
 public class Database {
     public static void main(String[] args) {
-        String username = "olek";
-        String password = "haslo12345";
-        String jdbcDriver = "com.mysql.jdbc.Driver";
-        String dbURL = "jdbc:mysql://localhost:3306/przykladowabaza?dontTrackOpenResources=true";
+        Scanner in = new Scanner(System.in);
+        System.out.print("Podaj nazwę użytkownika: ");
+        String username = in.next();
+        System.out.print("Podaj hasło: ");
+        String password = in.next();
+        System.out.print("Podaj adres URL (np. jdbc:mysql://localhost:3306/przykladowabaza): ");
+        String dbURL = in.next() + "?dontTrackOpenResources=true";
         try{
-            DatabaseManager manager = DatabaseManager.createDatabaseManager(jdbcDriver, dbURL, username, password);
+            DatabaseManager manager = DatabaseManager.createDatabaseManager();
+            manager.createConnection(dbURL, username, password);
             if(manager.exists("Pracownik")) manager.executeUpdate("DROP TABLE Pracownik");
             manager.executeUpdate("CREATE TABLE Pracownik(id INT, imie VARCHAR(20), nazwisko VARCHAR(20), data_urodzenia DATE, zarobek DOUBLE, PRIMARY KEY(id))");
             int insertedRows = manager.executeUpdate("INSERT INTO Pracownik VALUES(1, 'Mateusz', 'Serwan', '1995-01-01', 1500.50)");
@@ -28,11 +33,11 @@ public class Database {
             System.out.println("Liczba wierszych dodanych po stworzeniu tabeli: " + insertedRows);
             System.out.println("Początkowy stan tabeli: ");
             ArrayList<String> rows = manager.getAllFromResultSet(manager.getAll("Pracownik"));
-            for(String row : rows) System.out.println(row);
+            if(rows != null) for(String row : rows) System.out.println(row);
             manager.executeUpdatePreparedStatement("UPDATE Pracownik SET imie = ? WHERE imie = ?", "Andrzej", "Jakub");
             System.out.println("Lista imion po zamianie imienia Jakub na Andrzej:");
             rows = manager.getAllFromResultSet(manager.executeQuery("SELECT imie FROM Pracownik"));
-            for(String row : rows) System.out.println(row);
+            if(rows != null) for(String row : rows) System.out.println(row);
             System.out.println("Suma wszystkich zarobków: " + manager.sum("Pracownik", "zarobek"));
             System.out.println("Średnia zarobków: " + manager.average("Pracownik", "zarobek"));
             System.out.println("Ostatnie alfabetycznie imię: " + manager.max("Pracownik", "imie"));
