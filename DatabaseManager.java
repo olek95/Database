@@ -20,23 +20,25 @@ import java.util.ArrayList;
 public class DatabaseManager{
     private static DatabaseManager manager;
     private static Connection conn;
-    private DatabaseManager(String jdbcDriver, String url, String user, String password) throws ClassNotFoundException, SQLException{
-        Class.forName(jdbcDriver);
-        conn = DriverManager.getConnection(url, user, password);
-    }
     /**
      * Tworzy zarządcę bazy danych, jeżeli taki zarządca nie został jeszcze utworzony. 
-     * @param jdbcDriver sterownik bazy danych 
+     * @return zarządcę bazy danych 
+     */
+    public static synchronized DatabaseManager createDatabaseManager(){
+        if(manager == null) manager = new DatabaseManager(); 
+        return manager;
+    }
+    /**
+     * Tworzy połączenie z bazą danych. 
      * @param url adres url bazy danych 
      * @param user nazwa użytkownika 
      * @param password hasło użytkownika 
-     * @return zarządcę bazy danych 
      * @throws ClassNotFoundException
      * @throws SQLException 
      */
-    public static synchronized DatabaseManager createDatabaseManager(String jdbcDriver, String url, String user, String password) throws ClassNotFoundException, SQLException{
-        if(manager == null) manager = new DatabaseManager(jdbcDriver, url, user, password); 
-        return manager;
+    public void createConnection(String url, String user, String password) throws ClassNotFoundException, SQLException{
+        Class.forName("com.mysql.jdbc.Driver");
+        conn = DriverManager.getConnection(url, user, password);
     }
     /**
      * Wykonuje polecenie SQL, które zwraca zbiór wynikowy. Typowo do tego rodzaju 
